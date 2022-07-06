@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+DIR="$HOME/.local/bin"
+rofi_command="rofi -theme $DIR/rofi/themes/screenshot.rasi"
+
+year_month=`date +%Y-%m`
+dir="`xdg-user-dir PICTURES`/Screenshots/${year_month}"
+
+# geometry=`xrandr | head -n1 | cut -d',' -f2 | tr -d '[:blank:],current'`
+
+# Get current day-hour-minute-seconds
+time=`date +%d_%H-%M-%S`
+# Get focused window name
+current_window=`xdotool getwindowfocus getwindowclassname`
+# Set filename to current time and focused window name
+file="${time}_${current_window}.png"
+
+# Buttons
+screen=""
+area=""
+window=""
+infive=""
+inten=""
+
+# dunstify -u low --replace=8787 -i /usr/share/archcraft/icons/dunst/desktop.png "Keyboard layout set"
+# notify and view screenshot
+notify_view () {
+	if [[ -e "$dir/$file" ]]; then
+		dunstify -u low --replace=699 -i /usr/share/archcraft/icons/dunst/picture.png "Screenshot Saved."
+	else
+		dunstify -u low --replace=699 -i /usr/share/archcraft/icons/dunst/picture.png "Screenshot Deleted."
+	fi
+}
+
+# countdown
+countdown () {
+	for sec in `seq $1 -1 1`; do
+		dunstify -t 1000 --replace=699 -i /usr/share/archcraft/icons/dunst/timer.png "Taking shot in : $sec"
+		sleep 1
+	done
+}
+
+# take shots
+shotnow () {
+	cd ${dir} && sleep 0.5 && maim -u -f png | tee "$file" | xclip -selection clipboard -t image/png
+	/home/sph/.local/bin/imgur "$dir/$file"
+	notify_view
+}
+
+shot5 () {
+	countdown '5'
+	sleep 1 && cd ${dir} && maim -u -f png | tee "$file" | xclip -selection clipboard -t image/png
+	notify_view
+}
+
+shot10 () {
+	countdown '10'
+	sleep 1 && cd ${dir} && maim -u -f png | tee "$file" | xclip -selection clipboard -t image/png
+	notify_view
+}
+
+shotwin () {
+	cd ${dir} && maim -u -f png -i `xdotool getactivewindow` | tee "$file" | xclip -selection clipboard -t image/png
+	notify_view
+}
+
+shotarea () {
+	# take screenshot without cursor and pipe to feh, get its pid
+	maim -u | feh -F - &
+	feh_pid=$!
+
+	# wait for feh to start
+	while [ -z "$(xdotool search --pid "$feh_pid")" ]; do
+			sleep 0.1
+	done
+
+	# get window ID of feh
+	wid="$(xdotool search --pid "$feh_pid")"
+
+	# fullscreen feh and move top-left (works with multi-monitor)
+	xdotool windowsize "$wid" 100% 100%
+	xdotool windowmove "$wid" 0 0
+
+	# check if year-month directory exists
+	if [ ! -d "$dir" ]; then
+		# if not, create it
+		mkdir $dir
+	fi
+
+	# take the new screenshot by selection,
+	# save the file,
+	# pipe to clipboard
+	cd ${dir} && maim -u -f png -s -b 2 -c 0.35,0.55,0.85,0.25 -l | tee "$file" | xclip -selection clipboard -t image/png
+
+	# kill feh
+	kill "$feh_pid"
+	/home/sph/.local/bin/imgur "$dir/$file"
+	notify_view
+}
+
+if [[ ! -d "$dir" ]]; then
+	mkdir -p "$dir"
+fi
+
+if [[ "$1" == "--now" ]]; then
+	shotnow
+	exit 1
+elif [[ "$1" == "--in5" ]]; then
+	shot5
+	exit 1
+elif [[ "$1" == "--in10" ]]; then
+	shot10
+	exit 1
+elif [[ "$1" == "--win" ]]; then
+	shotwin
+	exit 1
+elif [[ "$1" == "--area" ]]; then
+	shotarea
+	exit 1
+else
+	echo -e "Available Options : --now --in5 --in10 --win --area"
+fi
+
+# Variable passed to rofi
+options="$screen\n$area\n$window\n$infive\n$inten"
+
+chosen="$(echo -e "$options" | $rofi_command -p 'Take Screenshot' -dmenu -selected-row 0)"
+case $chosen in
+    $screen)
+		shotnow
+        ;;
+    $area)
+		shotarea
+        ;;
+    $window)
+		shotwin
+		;;
+    $infive)
+		shot5
+		;;
+    $inten)
+		shot10
+        ;;
+esac
+

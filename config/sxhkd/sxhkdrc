@@ -1,0 +1,34 @@
+# Spotify control
+XF86Audio{Next,Prev,Play}
+	dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.{Next,Previous,PlayPause}
+
+# Volume control
+XF86Audio{Mute,LowerVolume,RaiseVolume}
+	volume {--toggle,--dec,--inc}
+
+# Programs
+super + {p,w, shift + f}
+	{color-gpick, firefox, thunar}
+
+# Lock screen
+ctrl + alt + l
+	betterlockscreen --lock
+
+# Terminals
+super + {_,shift,ctrl +} Return
+	{kitty,kitty --class 'float\,float',kitty --class 'Fullscreen\,Fullscreen' -o window_padding_width=14 -o background_opacity=1 --start-as=fullscreen}
+
+# Screenshot
+# select area
+Print
+  $HOME/.local/bin/screenshot
+
+# Rofi
+alt + F1
+	$HOME/.local/bin/launcher
+
+super + {x,s,shift + w,n}
+	$HOME/.local/bin/{powermenu,screenshot,windows,network_menu}
+
+ctrl + alt + space
+	$HOME/.local/bin/layouts

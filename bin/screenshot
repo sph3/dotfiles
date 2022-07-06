@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+# Imgur uploader: https://github.com/tremby/imgur.sh
+
+# get current year and month
+year_month=$(date +%Y-%m)
+
+# set dir to Screenshots folder + current year-month
+dir="$(xdg-user-dir PICTURES)/Screenshots/${year_month}"
+
+# get current day-hour-minute-seconds
+time=$(date +%d_%H-%M-%S)
+
+# get focused window name
+current_window=$(xdotool getwindowfocus getwindowclassname)
+
+# set filename to current time and focused window name
+file="${time}_${current_window}.png"
+
+notify_send() {
+	dunstify -u low --replace=699 "Screenshot $1" "$2"
+}
+
+take_screenshot() {
+  # take screenshot of the entire screen with the cursor hidden,
+  # pipe the image to feh in fullscreen and get feh's pid,
+  # now we get a nice still image to select an area on for the final screenshot
+  maim -u | feh -F - &
+	feh_pid=$!
+
+	# wait for feh to start
+	while [ -z "$(xdotool search --pid "$feh_pid")" ]; do
+			:
+	done
+
+	# get window ID of feh
+	wid="$(xdotool search --pid "$feh_pid")"
+
+	# fullscreen feh and move top-left (works with multi-monitor)
+	# (commented since I don't need it)
+
+	# xdotool windowsize "$wid" 100% 100%
+	# xdotool windowmove "$wid" 0 0
+
+	# check if year-month directory exists
+	if [ ! -d "$dir" ]; then
+		# if not, create it
+		mkdir -p $dir
+	fi
+
+	# create temp file to capture stderr
+	err_file=$(mktemp /tmp/screenshot.XXXXXX)
+
+	# take the new screenshot by selection
+	# save the file and pipe to clipboard
+	# stderr is redirected to a temp file
+	cd ${dir}
+	maim -u -f png -s -b 0 -c 0.35,0.55,0.85,0.25 -l 2> $err_file | tee "$file" | xclip -selection clipboard -t image/png
+
+	# kill feh
+	kill "$feh_pid"
+
+	# read temp error file
+	error=$(<$err_file)
+
+	# check whether the screenshot was cancelled
+	# if so, delete the empty image file and quit the script
+	if [[ "$error" == *"cancelled"* ]]; then
+		rm "$file"
+		notify_send "cancelled"
+		return 0
+	fi
+
+	# send the notification
+	notify_send "saved" "$file"
+
+	# upload screenshot to imgur and copy the link to clipboard
+	$HOME/.local/bin/imgur "$dir/$file"
+
+	# delete temp file
+	rm $err_file
+}
+
+take_screenshot
