@@ -46,6 +46,4 @@ thunar --daemon &
 
 xbanish &
 
-/home/sph/Dev/dunspotify/checkSong.py &> /home/sph/.local/share/dunspotify/log.txt &
-
 while type dwm >/dev/null; do dwm && continue || break; done

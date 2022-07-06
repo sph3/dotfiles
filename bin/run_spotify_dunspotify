@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# execute this from the spotify.desktop file
+
+# run spotify, then run dunspotify
+# kill dunspotify when spotify is closed
+
+# maybe I don't need this at all, and just have to add 2 maybe 3 lines to
+# my checkSong.py but everything is a learning experience, right?
+
+spotify --uri=%U &
+sleep 4
+$HOME/Dev/dunspotify/checkSong.py & duns_pid=$!
+
+while pgrep -x spotify >/dev/null
+do
+  true
+done
+
+kill "$duns_pid"
