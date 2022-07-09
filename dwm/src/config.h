@@ -72,10 +72,10 @@ static const Rule rules[] = {
      *	WM_CLASS(STRING) = instance, class
      *	WM_NAME(STRING) = title
      */
-    /* class            instance    title                     tags mask    iscentered    isfloating   monitor */
-    { NULL,             NULL,       "Picture-in-Picture",     0,           0,            1,           -1 },
+    /* class            instance    title       tags mask     iscentered   isfloating   monitor */
     { "Inkscape",       NULL,       NULL,       0,            0,           0,           -1 },
 	{ "firefox",  		NULL,       NULL,       1 << 1,       0,           0,           -1 },
+    { "firefox",        NULL,       "Picture-in-Picture",     0,            1,           1,           -1 },
 	{ "Google-chrome",  NULL,       NULL,       1 << 1,       0,           0,           -1 },
 	{ "Code",   		NULL,       NULL,       1 << 3,       0,           0,           -1 },
 	{ "discord",   		NULL,       NULL,       1 << 2,       0,           0,           -1 },

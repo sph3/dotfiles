@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env dash
 
 # Get Volume
 get_volume() {
-	volume=`pactl get-sink-volume @DEFAULT_SINK@ | tail -n 2 | sed -e 's,.* \([0-9][0-9]*\)%.*,\1,' | head -n 1`
+	volume="$(pactl get-sink-volume @DEFAULT_SINK@ | tail -n 2 | sed -e 's,.* \([0-9][0-9]*\)%.*,\1,' | head -n 1)"
 	echo "$volume%"
 }
 
@@ -22,9 +22,9 @@ is_running=$(pgrep -x spotify >/dev/null && echo "Process found" || echo "Proces
 
 # Send notification
 send_notify() {
-	if [[ "$1" == "mute" ]]; then
-		status=`pactl get-sink-mute @DEFAULT_SINK@`
-		if [[ "${status}" = 'Mute: no' ]]; then
+	if [ "$1" = "mute" ]; then
+		status="$(pactl get-sink-mute @DEFAULT_SINK@)"
+		if [ "${status}" = "Mute: no" ]; then
 			muteStatus="Unmuted"
 		else
 			muteStatus="Muted"
@@ -38,9 +38,9 @@ send_notify() {
 
 # Send notification no song
 send_notify_w() {
-	if [[ "$1" == "mute" ]]; then
-		status=`pactl get-sink-mute @DEFAULT_SINK@`
-		if [[ "${status}" = 'Mute: no' ]]; then
+	if [ "$1" = "mute" ]; then
+		status="$(pactl get-sink-mute @DEFAULT_SINK@)"
+		if [ "${status}" = "Mute: no" ]; then
 			get_song_info && dunstify -u low --replace=69 "Volume : Unmuted"
 		else
 			get_song_info && dunstify -u low --replace=69 "Volume : Muted"
@@ -82,18 +82,18 @@ toggle_mute_w() {
 }
 
 # Execute accordingly
-if [[ "$is_running" == "Process found" ]]; then
-	if [[ "$1" == "--inc" ]]; then
+if [ "$is_running" = "Process found" ]; then
+	if [ "$1" = "--inc" ]; then
 		inc_volume
-	elif [[ "$1" == "--dec" ]]; then
+	elif [ "$1" = "--dec" ]; then
 		dec_volume
 	else
 		toggle_mute
 	fi
 else
-	if [[ "$1" == "--inc" ]]; then
+	if [ "$1" = "--inc" ]; then
 		inc_volume_w
-	elif [[ "$1" == "--dec" ]]; then
+	elif [ "$1" = "--dec" ]; then
 		dec_volume_w
 	else
 		toggle_mute_w
