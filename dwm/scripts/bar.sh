@@ -8,6 +8,20 @@ interval=0
 # load colors
 . ~/dwm/scripts/bar_themes/catppuccin
 
+DATA="$HOME/.local/share/dunspotify/currentSong"
+
+spotify() {
+  is_running=$(pgrep -x spotify >/dev/null && echo "Process found" || echo "Process not found")
+  if [ "$is_running" = "Process found" ]; then
+    artist="$(cat $DATA | grep "artist" | cut -d'|' -f2)"
+    title="$(cat $DATA | grep "songTitle" | cut -d'|' -f2)"
+    printf "^c$black^ ^b$green^ "
+    printf "^c$white^ ^b$grey^ $title - $artist ^b$black^"
+  else
+    echo ""
+  fi
+}
+
 get_volume(){
   curStatus=$(pactl get-sink-mute @DEFAULT_SINK@)
   volume=$(pactl get-sink-volume @DEFAULT_SINK@ | tail -n 2 | sed -e 's,.* \([0-9][0-9]*\)%.*,\1,' | head -n 1)
@@ -61,5 +75,5 @@ while true; do
   [ $interval = 0 ] || [ $(($interval % 3600)) = 0 ] && updates=$(pkg_updates)
   interval=$((interval + 1))
 
-  sleep 1 && xsetroot -name "$(get_volume) $updates $(cpu) $(mem) $(clock)"
+  sleep 1 && xsetroot -name "$(spotify) $(get_volume) $updates $(cpu) $(mem) $(clock)"
 done
