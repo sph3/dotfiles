@@ -29,28 +29,28 @@ get_volume(){
   if [ "${curStatus}" = 'Mute: yes' ]
   then
       printf "^c$black^ ^b$mauve^ 婢"
-      printf "^c$white^ ^b$grey^ $volume%% (Muted)"
+      printf "^c$white^ ^b$grey^ $volume%% (Muted) ^b$black^"
   else
       printf "^c$black^ ^b$mauve^ 墳"
-      printf "^c$white^ ^b$grey^ $volume%%"
+      printf "^c$white^ ^b$grey^ $volume%% ^b$black^"
   fi
 }
 
-pkg_updates() {
-  # updates=$(doas xbps-install -un | wc -l) # void
-  updates=$(pacman -Qu | wc -l) # arch, needs pacman contrib
-  # updates=$(aptitude search '~U' | wc -l)  # apt (ubuntu,debian etc)
+# pkg_updates() {
+#   # updates=$(doas xbps-install -un | wc -l) # void
+#   updates=$(pacman -Qu | wc -l) # arch, needs pacman contrib
+#   # updates=$(aptitude search '~U' | wc -l)  # apt (ubuntu,debian etc)
 
-  if [[ "$updates" == 0 ]]; then
-    printf "^b$black^ ^c$green^  Updated"
-  else
-    if [[ "$updates" == 1 ]]; then
-      printf "^b$black^ ^c$green^  $updates"" update"
-    else
-      printf "^b$black^ ^c$green^  $updates"" updates"
-    fi
-  fi
-}
+#   if [[ "$updates" == 0 ]]; then
+#     printf "^b$black^ ^c$green^  Updated"
+#   else
+#     if [[ "$updates" == 1 ]]; then
+#       printf "^b$black^ ^c$green^  $updates"" update"
+#     else
+#       printf "^b$black^ ^c$green^  $updates"" updates"
+#     fi
+#   fi
+# }
 
 cpu() {
   cpu_val=$(grep -o "^[^ ]*" /proc/loadavg)
@@ -72,8 +72,8 @@ clock() {
 
 while true; do
 
-  [ $interval = 0 ] || [ $(($interval % 3600)) = 0 ] && updates=$(pkg_updates)
-  interval=$((interval + 1))
+  # [ $interval = 0 ] || [ $(($interval % 3600)) = 0 ] && updates=$(pkg_updates)
+  # interval=$((interval + 1))
 
-  sleep 1 && xsetroot -name "$(spotify) $(get_volume) $updates $(cpu) $(mem) $(clock)"
+  sleep 1 && xsetroot -name "$(spotify) $(get_volume) $(cpu) $(mem) $(clock)"
 done
